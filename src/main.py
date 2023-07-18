@@ -56,47 +56,48 @@ def update_list():
                f'Defence: {e.df}, EXP: {e.xp}, Level: {e.lv}')
 
 
-# SETS GOLD EARNED FOR AI UNIT IF IT ATTACKS
-def gold_ai(unit, target):
+# SETS GOLD EARNED FOR UNIT IF IT ATTACKS
+def gold(unit, target):
     global ai_gold, pl_gold
+
     income1 = unit.dmg * 5  # ADDS GOLD 5*SELF DMG TO SELF
     income2 = target.df * 3  # ADDS GOLD 3*TARGET DEFENSE TO TARGET
-    ai_gold += income1
-    pl_gold += income2
-    print(f'AI GOLD EARNED: {income1}🪙. AI GOLD BALANCE: {ai_gold}🪙')
-    to_log(f'AI GOLD EARNED: {income1}. AI GOLD BALANCE: {ai_gold}')
-    print(f'PLAYER GOLD EARNED: {income2}🪙. PLAYER GOLD BALANCE: {pl_gold}🪙')
-    to_log(f'PLAYER GOLD EARNED: {income2}. PLAYER GOLD BALANCE: {pl_gold}')
+
+    if ai_names in unit.class_name:
+        ai_gold += income1
+        pl_gold += income2
+
+        print(f'AI GOLD EARNED: {income1}🪙. AI GOLD BALANCE: {ai_gold}🪙')
+        to_log(f'AI GOLD EARNED: {income1}. AI GOLD BALANCE: {ai_gold}')
+        print(f'PLAYER GOLD EARNED: {income2}🪙. PLAYER GOLD BALANCE: {pl_gold}🪙')
+        to_log(f'PLAYER GOLD EARNED: {income2}. PLAYER GOLD BALANCE: {pl_gold}')
+
+    else:
+        ai_gold += income2
+        pl_gold += income1
+
+        print(f'AI GOLD EARNED: {income2}🪙. AI GOLD BALANCE: {ai_gold}🪙')
+        to_log(f'AI GOLD EARNED: {income2}. AI GOLD BALANCE: {ai_gold}')
+        print(f'PLAYER GOLD EARNED: {income1}🪙. PLAYER GOLD BALANCE: {pl_gold}🪙')
+        to_log(f'PLAYER GOLD EARNED: {income1}. PLAYER GOLD BALANCE: {pl_gold}')
 
 
-# SETS GOLD EARNED FOR PLAYER UNIT IF IT ATTACKS
-def gold_pl(unit, target):
-    global ai_gold, pl_gold
-    income1 = unit.dmg * 5  # ADDS GOLD 5*SELF DMG TO SELF
-    income2 = target.df * 3  # ADDS GOLD 3*TARGET DEFENSE TO TARGET
-    ai_gold += income2
-    pl_gold += income1
-    print(f'AI GOLD EARNED: {income2}🪙. AI GOLD BALANCE: {ai_gold}🪙')
-    to_log(f'AI GOLD EARNED: {income2}. AI GOLD BALANCE: {ai_gold}')
-    print(f'PLAYER GOLD EARNED: {income1}🪙. PLAYER GOLD BALANCE: {pl_gold}🪙')
-    to_log(f'PLAYER GOLD EARNED: {income1}. PLAYER GOLD BALANCE: {pl_gold}')
+# SETS GOLD EARNED FOR ATTACKER UNIT IF TARGET DIES
+def gold_dead(unit):
+    global pl_gold, ai_gold
 
-
-def gold_dead_pl(unit):
-    global pl_gold
     income1 = unit.dmg * 7
-    pl_gold += income1
-    print(f'GOLD EARNED: {income1}🪙. GOLD BALANCE: {pl_gold}🪙')
-    to_log(f'GOLD EARNED: {income1}. GOLD BALANCE: {pl_gold}')
 
+    if ai_names in unit.class_name:
+        ai_gold += income1
 
-# SETS GOLD EARNED FOR A UNIT IF ITS TARGET IS KILLED
-def gold_dead_ai(unit):
-    global ai_gold
-    income1 = unit.dmg * 7
-    ai_gold += income1
-    print(f'GOLD EARNED: {income1}🪙. GOLD BALANCE: {ai_gold}🪙')
-    to_log(f'GOLD EARNED: {income1}. GOLD BALANCE: {ai_gold}')
+        print(f'GOLD EARNED: {income1}🪙. GOLD BALANCE: {ai_gold}🪙')
+        to_log(f'GOLD EARNED: {income1}. GOLD BALANCE: {ai_gold}')
+    else:
+        pl_gold += income1
+
+        print(f'GOLD EARNED: {income1}🪙. GOLD BALANCE: {pl_gold}🪙')
+        to_log(f'GOLD EARNED: {income1}. GOLD BALANCE: {pl_gold}')
 
 
 # MAIN FUNCTION
@@ -173,7 +174,7 @@ def main():
                             pl_choice = player_units[choice1]
                             ai_choice = ai_units[choice2]
                             pl_choice.attack(ai_choice)  # CREATES INSTANCE OF PLAYER AS SELF AND AI AS TARGET
-                            gold_pl(pl_choice, ai_choice)  # CALLS GOLD() ABOVE
+                            gold(pl_choice, ai_choice)  # CALLS GOLD() ABOVE
                             print(f'🗡️ YOUR UNIT [{pl_choice.class_type} | {pl_choice.class_name}] ATTACKED '
                                   f'[{ai_choice.class_type} | {ai_choice.class_name}] AND DEALT '
                                   f'{pl_choice.dmg} DAMAGE!')
@@ -186,7 +187,7 @@ def main():
                                 print(f'💀 AI UNIT: [{ai_choice.class_type} | {ai_choice.class_name}] HAS BEEN DEFEATED!')
                                 # TO EVENT LOG
                                 to_log(f'AI UNIT: [{ai_choice.class_type} | {ai_choice.class_name}] HAS BEEN DEFEATED!')
-                                gold_dead_pl(pl_choice)  # CALLS GOLD_DEAD_PL() ABOVE
+                                gold_dead(pl_choice)  # CALLS GOLD_DEAD_PL() ABOVE
                                 ai_units.pop(choice2)  # REMOVES THE TARGET FROM THE LIST SO IT DOESN'T DISPLAY
 
                             if pl_choice.hp < 25:  # CHECKS IF PLAYER UNIT IS LESS THAN 25
@@ -217,7 +218,7 @@ def main():
             index = player_units.index(pl_auto)  # AS AI SELECTS FROM A LIST NOT INDEX, SET INDEX TO THE ITEM
             print(f'AI GOLD: {ai_gold}🪙')  # DISPLAYS PLAYER TEAM'S GOLD
             to_log(f'AI GOLD: {ai_gold}')  # DISPLAYS PLAYER TEAM'S GOLD
-            gold_ai(ai_auto, pl_auto)  # CALLS GOLD() ABOVE
+            gold(ai_auto, pl_auto)  # CALLS GOLD() ABOVE
             print(f'🗡️ AI UNIT [{ai_auto.class_type} | {ai_auto.class_name}] ATTACKED '
                   f'[{pl_auto.class_type} | {pl_auto.class_name}] AND DEALT '
                   f'{ai_auto.dmg} DAMAGE!')
@@ -229,7 +230,7 @@ def main():
                 print('==============')  # DIVIDER
                 print(f'💀 YOUR UNIT: [{pl_auto.class_type} | {pl_auto.class_name}] HAS BEEN DEFEATED!')
                 to_log(f'YOUR UNIT: [{pl_auto.class_type} | {pl_auto.class_name}] HAS BEEN DEFEATED!')
-                gold_dead_ai(ai_auto)  # CALLS GOLD_DEAD_AI ABOVE()
+                gold_dead(ai_auto)  # CALLS GOLD_DEAD_AI ABOVE()
                 player_units.pop(index)  # REMOVES TARGET PLAYER UNIT
 
             if ai_auto.hp < 25:  # CHECKS IF SELECTED AI UNIT IS BELOW 25
